@@ -44,6 +44,8 @@ contexto.fillRect(0,0, canvas.width, canvas.height)
 }
 
 //chao
+function criaChao () {
+ 
 const chao = {
  spriteX: 0,
  spriteY: 631,
@@ -51,6 +53,15 @@ const chao = {
  altura: 112,
  x: 0,
  y: canvas.height - 112,
+ atualiza(){
+    const movimentoDochao = 1;
+      const repeteEm = chao.largura / 2;
+   if (chao.x <= - repeteEm){
+    return chao.x=0
+        }
+        chao.x = chao.x - 1;
+      },
+  
  desenha(){
     contexto.drawImage(
         sprites,
@@ -67,9 +78,10 @@ const chao = {
             chao.largura, chao.altura,  
             (chao.x + chao.largura), chao.y, 
             chao.largura, chao.altura,
-            );
- }
-
+        );
+    },
+  };
+  return chao;
 }
 
 function fazColisao(Darkbird, chao) {
@@ -100,14 +112,12 @@ const Darkbird = {
     gravidade: 0.25,
     velocidade: 0,  
    atualiza () {
-    if(fazColisao(Darkbird, chao)){
-        console.log ('fez colizao')
-        somQueda.play();
+    if(fazColisao(Darkbird, globais.chao)){
+  somQueda.play();
         setTimeout(() => {
         mudaParaTela(Telas.INICIO);
         }, 500);
         return;
-
     }
     Darkbird.velocidade = Darkbird.velocidade + Darkbird.gravidade;
     Darkbird.y = Darkbird.y + Darkbird.velocidade;
@@ -158,45 +168,51 @@ telaAtiva.inicializa();
 
 }
 const Telas = {
-INICIO:{
-    inicializa () {
-globais.Darkbird = criaDarkbird ();
+    INICIO: {
+      inicializa() {
+        globais.Darkbird = criaDarkbird();
+        globais.chao = criaChao();
+      },
+      desenha(){
+        background.desenha();
+        globais.chao.desenha();
+        globais.Darkbird.desenha();
+        mensagemGetReady.desenha();
+      },
+      click() {
+        mudaParaTela(Telas.JOGO);
+      },
+      atualiza() {
+        globais.chao.atualiza();
+      }
+    }
+  };
 
+Telas.JOGO = {
+    inicializa() {
+      
     },
-desenha(){
-background.desenha();
-chao.desenha();
-globais.Darkbird.desenha();
-mensagemGetReady.desenha();
-},
-click(){
-    mudaParaTela(Telas.JOGO);  
-},
-atualiza(){
-}
-}
-};
-Telas.JOGO ={
-    desenha (){     
+    desenha() {
+      background.desenha();
+      globais.chao.desenha();
+      globais.Darkbird.desenha();
     
-background.desenha();
-chao.desenha();
-globais.Darkbird.desenha();
     },
-    click(){
-        globais.Darkbird.pula();
+    click() {
+      globais.Darkbird.pula();
     },
-atualiza() {
-    globais.Darkbird.atualiza();
-
-}
-};
+    atualiza() {
+      
+      globais.chao.atualiza();
+      globais.Darkbird.atualiza();
+    }
+  };
 
 function loop() {
-
-telaAtiva.desenha();
-telaAtiva.atualiza();
-
+    telaAtiva.desenha();
+    telaAtiva.atualiza();
+  
+    frames = frames + 1;
 requestAnimationFrame (loop);
 }
 window.addEventListener('click', function(){
