@@ -1,5 +1,5 @@
 
-
+let frames = 0;
 const somQueda =  new Audio();
 somQueda.src = './efeitos/pipe.wav'
 
@@ -42,6 +42,11 @@ contexto.fillRect(0,0, canvas.width, canvas.height)
 
 }
 }
+
+
+
+
+
 
 //chao
 function criaChao () {
@@ -122,7 +127,10 @@ const Darkbird = {
     Darkbird.velocidade = Darkbird.velocidade + Darkbird.gravidade;
     Darkbird.y = Darkbird.y + Darkbird.velocidade;
 },
+frameAtual: 0,
+atualizaOFrameAtual (){
 
+},
 desenha() {
 contexto.drawImage(
 sprites,
@@ -154,6 +162,94 @@ desenha () {
    }
 }
 
+function criaCanos (){
+const canos = {
+largura: 40,
+altura: 404,
+chao: {
+spriteX: -6,
+spriteY: 189,
+},
+ceu: {
+spriteX: 43,
+spriteY : 189,
+},
+espaco: 80,
+desenha () {
+  canos.pares.forEach (function (par){   
+    const yRandom = par.y;
+    const espacamentoEntreCanos = 90;
+ const canoCeuX = par.x;
+ const canoCeuY = yRandom; 
+
+ //cano ceu
+ contexto.drawImage(
+    sprites,
+    canos.ceu.spriteX, canos.ceu.spriteY,
+    canos.largura, canos.altura, 
+    canoCeuX,canoCeuY, 
+    canos.largura, canos.altura,
+ )  
+// cano do chao
+const canoChaoX = par.x;
+const canoChaoY = canos.altura + espacamentoEntreCanos + yRandom;
+contexto.drawImage (
+    sprites,
+    canos.chao.spriteX, canos.chao.spriteY,
+    canos.largura, canos.altura, 
+    canoChaoX, canoChaoY, 
+    canos.largura, canos.altura,
+ )  
+ par.CanoCeu = {
+  x:canoCeuX,
+  y:canos.altura +canoCeuY
+ }
+ par.canoChao ={
+  x:canoChaoX,
+  y: canoChaoY
+  }
+})
+},
+temColisaoComDarkbird (par){
+  const cabecaDark = globais.Darkbird.y;
+  const peDark = globais.Darkbird.y + globais.Darkbird.altura;
+
+  if(globais.Darkbird.x >= par.x){
+    if(cabecaDark <=par.canoCeu.y){
+ return true;
+    }
+  if(peDark >= par.canoChao.y){
+    return true;
+  }
+}
+  return false;
+
+},
+pares: [],
+atualiza() {
+const passou100Frames = frames % 100 === 0;
+if(passou100Frames){
+canos.pares.push({
+    x:canvas.width,
+  y: -150 * (Math.random()+1),
+});
+}
+
+canos.pares.forEach(function(par){
+ par.x = par.x - 2;
+ if (canos.temColisaoComDarkbird(par)){
+}
+ if (par.x + canos.largura <=0){
+canos.pares.shift();
+ 
+}
+});
+}
+}
+return canos;
+
+}
+
 // telas
 ///
 const globais = {};
@@ -172,11 +268,14 @@ const Telas = {
       inicializa() {
         globais.Darkbird = criaDarkbird();
         globais.chao = criaChao();
+        globais.canos = criaCanos ();
+
       },
       desenha(){
         background.desenha();
-        globais.chao.desenha();
         globais.Darkbird.desenha();
+        globais.canos.desenha();
+        globais.chao.desenha();
         mensagemGetReady.desenha();
       },
       click() {
@@ -184,6 +283,7 @@ const Telas = {
       },
       atualiza() {
         globais.chao.atualiza();
+        globais.canos.atualiza();
       }
     }
   };
@@ -194,6 +294,7 @@ Telas.JOGO = {
     },
     desenha() {
       background.desenha();
+      globais.canos.desenha();
       globais.chao.desenha();
       globais.Darkbird.desenha();
     
@@ -202,12 +303,24 @@ Telas.JOGO = {
       globais.Darkbird.pula();
     },
     atualiza() {
-      
+      globais.canos.atualiza();
       globais.chao.atualiza();
+     
       globais.Darkbird.atualiza();
     }
+  
   };
-
+Telas.GAME_OVER = {
+  desenha() {
+    mensagemGameOver.desenha();
+  },
+  atualiza() {
+    
+  },
+  click() {
+    mudaParaTela(Telas.INICIO);
+  }
+}
 function loop() {
     telaAtiva.desenha();
     telaAtiva.atualiza();
