@@ -1,7 +1,9 @@
 
 let frames = 0;
+const Kasik = new Audio();
 const somQueda =  new Audio();
 somQueda.src = './efeitos/pipe.wav'
+Kasik.src = './efeitos/sound.wav'
 
 
 console.log ('[Aster] Dark Bird')
@@ -119,9 +121,7 @@ const Darkbird = {
    atualiza () {
     if(fazColisao(Darkbird, globais.chao)){
   somQueda.play();
-        setTimeout(() => {
-        mudaParaTela(Telas.INICIO);
-        }, 500);
+        mudaParaTela(Telas.GAME_OVER);
         return;
     }
     Darkbird.velocidade = Darkbird.velocidade + Darkbird.gravidade;
@@ -162,6 +162,23 @@ desenha () {
    }
 }
 
+const mensagemGameOver = {
+  sX: 134,
+  sY: 170,
+  w: 226,
+  h: 202,
+  x: (canvas.width / 2) - 226 / 2,
+  y: 50,
+  desenha() {
+    contexto.drawImage(
+      sprites,
+      mensagemGameOver.sX, mensagemGameOver.sY,
+      mensagemGameOver.w, mensagemGameOver.h,
+      mensagemGameOver.x, mensagemGameOver.y,
+      mensagemGameOver.w, mensagemGameOver.h
+    );
+  }
+}
 function criaCanos (){
 const canos = {
 largura: 40,
@@ -220,6 +237,7 @@ temColisaoComDarkbird (par){
     }
   if(peDark >= par.canoChao.y){
     return true;
+    
   }
 }
   return false;
@@ -237,7 +255,10 @@ canos.pares.push({
 
 canos.pares.forEach(function(par){
  par.x = par.x - 2;
+
  if (canos.temColisaoComDarkbird(par)){
+  somQueda.play();
+  mudaParaTela(Telas.GAME_OVER);
 }
  if (par.x + canos.largura <=0){
 canos.pares.shift();
@@ -290,7 +311,7 @@ const Telas = {
 
 Telas.JOGO = {
     inicializa() {
-      
+  
     },
     desenha() {
       background.desenha();
@@ -319,12 +340,13 @@ Telas.GAME_OVER = {
   },
   click() {
     mudaParaTela(Telas.INICIO);
+    
   }
 }
 function loop() {
     telaAtiva.desenha();
     telaAtiva.atualiza();
-  
+  Kasik.play();
     frames = frames + 1;
 requestAnimationFrame (loop);
 }
