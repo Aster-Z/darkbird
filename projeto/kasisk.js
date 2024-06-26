@@ -1,3 +1,9 @@
+
+
+const somQueda =  new Audio();
+somQueda.src = './efeitos/pipe.wav'
+
+
 console.log ('[Aster] Dark Bird')
 const sprites = new Image ();
 sprites.src = './sprites.png';
@@ -66,6 +72,20 @@ const chao = {
 
 }
 
+function fazColisao(Darkbird, chao) {
+const DarkbirdY = Darkbird.y + Darkbird.altura;
+const chaoY = chao.y;
+
+if (Darkbird.y >= chaoY - 30){
+    return true;
+
+}
+return false;
+}
+
+
+function criaDarkbird(){
+
 const Darkbird = {
     spriteX: 0,
     spriteY: 0,
@@ -73,9 +93,22 @@ const Darkbird = {
     altura: 39,
     x:10,
     y: 50,
+    pulo : 4.6,
+    pula () {
+    Darkbird.velocidade = - Darkbird.pulo;
+    },
     gravidade: 0.25,
     velocidade: 0,  
    atualiza () {
+    if(fazColisao(Darkbird, chao)){
+        console.log ('fez colizao')
+        somQueda.play();
+        setTimeout(() => {
+        mudaParaTela(Telas.INICIO);
+        }, 500);
+        return;
+
+    }
     Darkbird.velocidade = Darkbird.velocidade + Darkbird.gravidade;
     Darkbird.y = Darkbird.y + Darkbird.velocidade;
 },
@@ -87,11 +120,11 @@ Darkbird.spriteX, Darkbird.spriteY, // sprite x e sprite y
 Darkbird.largura, Darkbird.altura,  // tamanho do recorte na sprite
 Darkbird.x, Darkbird.y, 
 Darkbird.largura, Darkbird.altura,
-    );
-
-    }
+);
+   }
   }
-
+return Darkbird;
+}
 const mensagemGetReady = {
 sX: 127,
 sY: 18,
@@ -107,22 +140,33 @@ desenha () {
         mensagemGetReady.x, mensagemGetReady.y, 
         mensagemGetReady.w, mensagemGetReady.h,
         );
-       
+    
    }
 }
 
 // telas
 ///
+const globais = {};
 let telaAtiva = {};
-function mudaParaTela(novaTela){
+function mudaParaTela(novaTela){   
 telaAtiva =  novaTela;
+
+if(telaAtiva.inicializa) {
+telaAtiva.inicializa();
+
+}
+
 }
 const Telas = {
 INICIO:{
+    inicializa () {
+globais.Darkbird = criaDarkbird ();
+
+    },
 desenha(){
 background.desenha();
 chao.desenha();
-Darkbird.desenha();
+globais.Darkbird.desenha();
 mensagemGetReady.desenha();
 },
 click(){
@@ -137,15 +181,19 @@ Telas.JOGO ={
     
 background.desenha();
 chao.desenha();
-Darkbird.desenha();
+globais.Darkbird.desenha();
+    },
+    click(){
+        globais.Darkbird.pula();
     },
 atualiza() {
-Darkbird.atualiza();
+    globais.Darkbird.atualiza();
 
 }
 };
 
 function loop() {
+
 telaAtiva.desenha();
 telaAtiva.atualiza();
 
