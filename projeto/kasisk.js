@@ -91,18 +91,70 @@ Darkbird.largura, Darkbird.altura,
 
     }
   }
-  
-function loop() {
-Darkbird.atualiza();
+
+const mensagemGetReady = {
+sX: 127,
+sY: 18,
+w: 197,
+h: 152,
+x: (canvas.width / 2) - 197/ 2,
+y: 50,
+desenha () {
+    contexto.drawImage(
+        sprites,
+        mensagemGetReady.sX, mensagemGetReady.sY, 
+        mensagemGetReady.w, mensagemGetReady.h,  
+        mensagemGetReady.x, mensagemGetReady.y, 
+        mensagemGetReady.w, mensagemGetReady.h,
+        );
+       
+   }
+}
+
+// telas
+///
+let telaAtiva = {};
+function mudaParaTela(novaTela){
+telaAtiva =  novaTela;
+}
+const Telas = {
+INICIO:{
+desenha(){
 background.desenha();
 chao.desenha();
 Darkbird.desenha();
+mensagemGetReady.desenha();
+},
+click(){
+    mudaParaTela(Telas.JOGO);  
+},
+atualiza(){
+}
+}
+};
+Telas.JOGO ={
+    desenha (){     
+    
+background.desenha();
+chao.desenha();
+Darkbird.desenha();
+    },
+atualiza() {
+Darkbird.atualiza();
 
+}
+};
 
-
-
-
+function loop() {
+telaAtiva.desenha();
+telaAtiva.atualiza();
 
 requestAnimationFrame (loop);
 }
+window.addEventListener('click', function(){
+if (telaAtiva.click) { 
+    telaAtiva.click();
+}
+});
+mudaParaTela(Telas.INICIO);
 loop();
